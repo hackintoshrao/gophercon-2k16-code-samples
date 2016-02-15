@@ -44,24 +44,24 @@ Execute the benchmark
     BenchmarkGoMapAdd-4   	 5000000	       286 ns/op
     BenchmarkGoStructAdd-4	2000000000	         0.56 ns/op
     
-Simple Http server with map and struct response  
+Simple Http server with  struct response  
 
     package main
 
-import (
+    import (
 	"bytes"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
-)
+    )
 
-type add struct {
+    type add struct {
 	Sum int
-}
+    }
 
-func handleStructAdd(w http.ResponseWriter, r *http.Request) {
+    func handleStructAdd(w http.ResponseWriter, r *http.Request) {
 
 	var html bytes.Buffer
 	first, second := r.FormValue("first"), r.FormValue("second")
@@ -80,58 +80,55 @@ func handleStructAdd(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
-	t.Execute(&html, structSum)
-
+	err = t.Execute(&html, structSum)
+	
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write([]byte("<h2> Sum of Struct: " + fmt.Sprint(m.a+m.b) + "</h2>"))
-}
+    }
 
-func main() {
-	http.HandleFunc("/map", handleMapAdd)
-	http.HandleFunc("/struct", handleStructAdd)
-	log.Fatal(http.ListenAndServe("127.0.0.1:8081", nil))
-}
+    func main() {
+	
+        http.HandleFunc("/struct", handleStructAdd)
+        log.Fatal(http.ListenAndServe("127.0.0.1:8081", nil))
+    }
 
 Here is the benchmark for the http handlers 
-package main
+    package main
 
-import (
-	"net/http"
-	"net/http/httptest"
-	"testing"
-)
-
-func TestHandleStructAdd(t *testing.T) {
-
+    import (
+        "net/http"
+        "net/http/httptest"
+        "testing"
+    )    
+    func TestHandleStructAdd(t *testing.T) {
 	r := request(t, "/?first=20&second=30")
-
 	rw := httptest.NewRecorder()
-
-	handleStructAdd(rw, r)
-	if rw.Code == 500 {
-		t.Fatal("Internal server Error: " + rw.Body.String())
-	}
-	if rw.Body.String() != "<h2> Sum of Struct: 50</h2>" {
-		t.Fatal("Wrong response")
-	}
-
-}
-func BenchmarkHandleStructAdd(b *testing.B) {
-	r := request(b, "/?first=20&second=30")
-	for i := 0; i < b.N; i++ {
-		rw := httptest.NewRecorder()
-		handleStructAdd(rw, r)
-	}
-
-}
-
-func request(t testing.TB, url string) *http.Request {
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return req
-}
+       
+    	handleStructAdd(rw, r)
+    	if rw.Code == 500 {
+    		t.Fatal("Internal server Error: " + rw.Body.String())
+    	}
+    	if rw.Body.String() != "<h2> Sum of Struct: 50</h2>" {
+    		t.Fatal("Wrong response")
+    	}
+    }
+    func BenchmarkHandleStructAdd(b *testing.B) {
+    	r := request(b, "/?first=20&second=30")
+    	for i := 0; i < b.N; i++ {
+    		rw := httptest.NewRecorder()
+    		handleStructAdd(rw, r)
+      	}
+    }
+    func request(t testing.TB, url string) *http.Request {
+    	req, err := http.NewRequest("GET", url, nil)
+    	if err != nil {
+    		t.Fatal(err)
+    	}
+    	return req
+    }
 
     $go test 
 
@@ -155,7 +152,7 @@ func request(t testing.TB, url string) *http.Request {
          0.11s  4.93%  5.83%      0.85s 38.12%  runtime.findrunnable
             0     0%  5.83%      0.84s 37.67%  runtime.goexit0
             0     0%  5.83%      0.68s 30.49%  html/template.(*Template).Execute
-
+    
     (pprof) top20
     1340ms of 2230ms total (60.09%)
     Dropped 78 nodes (cum <= 11.15ms)
