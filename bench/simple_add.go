@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -33,16 +32,15 @@ func handleStructAdd(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 	}
 	err = t.Execute(&html, structSum)
-	
+
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write([]byte("<h2> Sum of Struct: " + fmt.Sprint(m.a+m.b) + "</h2>"))
+	w.Write([]byte(html.String()))
 }
-
 func main() {
-	
+
 	http.HandleFunc("/struct", handleStructAdd)
 	log.Fatal(http.ListenAndServe("127.0.0.1:8081", nil))
 }

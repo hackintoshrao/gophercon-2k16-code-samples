@@ -16,8 +16,8 @@ func TestHandleStructAdd(t *testing.T) {
 	if rw.Code == 500 {
 		t.Fatal("Internal server Error: " + rw.Body.String())
 	}
-	if rw.Body.String() != "<h2> Sum of Struct: 50</h2>" {
-		t.Fatal("Wrong response")
+	if rw.Body.String() != "<h2>Here is the sum 50</h2>" {
+		t.Fatal("Expected " + rw.Body.String())
 	}
 
 }

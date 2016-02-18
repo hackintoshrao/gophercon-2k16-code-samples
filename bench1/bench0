@@ -1,0 +1,3 @@
+PASS
+BenchmarkHandleStructAdd-4	   30000	     41808 ns/op
+ok  	github.com/hackintoshrao/gophercon-2k16-code-samples/bench	1.684s
